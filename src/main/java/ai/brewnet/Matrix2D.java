@@ -25,6 +25,16 @@ public class Matrix2D {
         return matrix2D;
     }
 
+    public static Matrix2D createRandomZeros(int rows, int cols) {
+        final Matrix2D matrix2D = new Matrix2D(rows, cols);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                matrix2D.doubles[i][j] = 0;
+            }
+        }
+        return matrix2D;
+    }
+
     public static double[] createRandom(int length) {
         final double[] dubs = new double[length];
         for (int i = 0; i < length; i++) {

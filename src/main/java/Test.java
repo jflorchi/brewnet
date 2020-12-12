@@ -10,27 +10,23 @@ public class Test {
 
         final Sequential model = new Sequential();
 
-        model.addLayer(new Dense(8, new Relu()));
-        model.addLayer(new Dense(64, new Relu()));
-        model.addLayer(new Dense(3, new Linear()));
+        model.addLayer(new Dense(2, new Relu()));
+        model.addLayer(new Dense(4, new Relu()));
+        model.addLayer(new Dense(1, new Linear()));
 
         model.compile();
 
         final double[][] x = new double[][]{
-                Matrix2D.createRandom(8),
-                Matrix2D.createRandom(8),
-                Matrix2D.createRandom(8),
-                Matrix2D.createRandom(8),
-                Matrix2D.createRandom(8),
-                Matrix2D.createRandom(8)
+                new double[]{0, 0},
+                new double[]{0, 1},
+                new double[]{1, 0},
+                new double[]{1, 1},
         };
         final double[][] y = new double[][]{
-                Matrix2D.createRandom(3),
-                Matrix2D.createRandom(3),
-                Matrix2D.createRandom(3),
-                Matrix2D.createRandom(3),
-                Matrix2D.createRandom(3),
-                Matrix2D.createRandom(3)
+                new double[]{0},
+                new double[]{1},
+                new double[]{1},
+                new double[]{1},
         };
 
         model.fit(x, y);

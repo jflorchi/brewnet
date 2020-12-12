@@ -12,8 +12,7 @@ import ai.brewnet.activation.ActivationFunction;
 public abstract class Layer {
 
     public int units;
-    public Matrix2D weights;
-    public Matrix2D biases;
+    public Matrix2D weights, biases;
     public Layer outputLayer, inputLayer;
     public ActivationFunction activationFunction;
 
