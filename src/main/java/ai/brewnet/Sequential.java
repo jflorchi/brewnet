@@ -75,7 +75,7 @@ public class Sequential {
         final double loss = this.loss.function(yHat.doubles[0], y.doubles[0]);
         final Matrix2D wGrad = this.optimizer.weightGradient(lastLayer.weights, lastLayer.gradients, y, yHat, loss);
         lastLayer.weights = lastLayer.weights.sub(this.optimizer.learningRate).mtimes(wGrad);
-        System.out.println(lastLayer.weights);
+
     }
 
 
