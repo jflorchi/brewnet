@@ -1,8 +1,6 @@
-import ai.brewnet.Matrix2D;
+import ai.brewnet.Activation;
 import ai.brewnet.Sequential;
-import ai.brewnet.activation.impl.Linear;
-import ai.brewnet.activation.impl.Relu;
-import ai.brewnet.layers.impl.Dense;
+import ai.brewnet.Layer;
 
 public class Test {
 
@@ -10,9 +8,9 @@ public class Test {
 
         final Sequential model = new Sequential();
 
-        model.addLayer(new Dense(2, new Relu()));
-        model.addLayer(new Dense(4, new Relu()));
-        model.addLayer(new Dense(1, new Linear()));
+        model.addLayer(new Layer.Dense(2, new Activation.Relu()));
+        model.addLayer(new Layer.Dense(4, new Activation.Relu()));
+        model.addLayer(new Layer.Dense(1, new Activation.Linear()));
 
         model.compile();
 

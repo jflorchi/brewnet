@@ -43,7 +43,7 @@ public class Matrix2D {
         return dubs;
     }
 
-    public Matrix2D multiply(final Matrix2D matrix) {
+    public Matrix2D mtimes(final Matrix2D matrix) {
         final int m1RowCount = this.getRowCount();
         final int m1ColumnCount = this.getColumnCount();
         final int m2RowCount = matrix.getRowCount();
@@ -63,7 +63,7 @@ public class Matrix2D {
         return rTensor;
     }
 
-    public Matrix2D add(Matrix2D tensor) {
+    public Matrix2D madd(Matrix2D tensor) {
         int m1Rows = this.getRowCount();
         int m1Cols = this.getColumnCount();
         int m2Rows = tensor.getRowCount();
@@ -73,6 +73,40 @@ public class Matrix2D {
         final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
         for (int i = 0; i < m1Rows; i++) {
             matrix2D.doubles[i][0] = this.doubles[i][0] + tensor.doubles[0][i];
+        }
+        return matrix2D;
+    }
+
+    public Matrix2D msub(Matrix2D tensor) {
+        int m1Rows = this.getRowCount();
+        int m1Cols = this.getColumnCount();
+        int m2Rows = tensor.getRowCount();
+        if (m1Cols != m2Rows) {
+            throw new IllegalArgumentException("a.cols != b.rows: (" + m1Cols + " != " + m2Rows + ")");
+        }
+        final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
+        for (int i = 0; i < m1Rows; i++) {
+            matrix2D.doubles[i][0] = this.doubles[i][0] - tensor.doubles[0][i];
+        }
+        return matrix2D;
+    }
+
+    public Matrix2D sub(double val) {
+        int m1Rows = this.getRowCount();
+        int m1Cols = this.getColumnCount();
+        final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
+        for (int i = 0; i < m1Rows; i++) {
+            matrix2D.doubles[i][0] = this.doubles[i][0] - val;
+        }
+        return matrix2D;
+    }
+
+    public Matrix2D times(double val) {
+        int m1Rows = this.getRowCount();
+        int m1Cols = this.getColumnCount();
+        final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
+        for (int i = 0; i < m1Rows; i++) {
+            matrix2D.doubles[i][0] = this.doubles[i][0] * val;
         }
         return matrix2D;
     }

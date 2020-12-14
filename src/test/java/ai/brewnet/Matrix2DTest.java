@@ -19,7 +19,7 @@ public class Matrix2DTest {
                 new double[]{29, -16},
                 new double[]{38, 6}
         });
-        assert t1.multiply(t2).equals(result);
+        assert t1.mtimes(t2).equals(result);
     }
 
     @Test
@@ -35,7 +35,7 @@ public class Matrix2DTest {
                 new double[]{3},
                 new double[]{9}
         });
-        assert t1.add(t2).equals(result);
+        assert t1.madd(t2).equals(result);
     }
 
     @Test

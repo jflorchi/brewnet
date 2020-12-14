@@ -1,19 +1,13 @@
 package ai.brewnet;
 
-import ai.brewnet.activation.ActivationFunction;
-import ai.brewnet.activation.impl.Linear;
-import ai.brewnet.activation.impl.Softmax;
-import ai.brewnet.layers.Layer;
-import ai.brewnet.loss.Loss;
-import ai.brewnet.loss.impl.MeanSquaredError;
-
 import java.util.LinkedList;
 
 public class Sequential {
 
-    public ActivationFunction activationFunction = new Linear();
+    public Activation activationFunction = new Activation.Linear();
     public LinkedList<Layer> layers = new LinkedList<>();
-    public Loss loss = new MeanSquaredError();
+    public Loss loss = new Loss.MeanSquaredError();
+    public Optimizer optimizer = new Optimizer.SGD();
 
     public Sequential() {
 
@@ -68,15 +62,20 @@ public class Sequential {
      * @param y a 2D double array where each sub array is the expected output of the network
      */
     public void fit(final double[][] x, final double[][] y) {
-
         for (int i = 0; i < x.length; i++) {
-            double[] ds = x[i];
-            final Matrix2D in = new Matrix2D(new double[][]{ds});
+            final Matrix2D in = new Matrix2D(new double[][]{x[i]});
+            final Matrix2D out = new Matrix2D(new double[][]{y[i]});
             Matrix2D prediction = this.predict(in.transpose()).transpose();
-
-            System.out.println("Loss: " + this.loss.compute(prediction.doubles[0], y[i]));
-
+            this.backPropagation(in, out, prediction, this.layers.getLast());
         }
+    }
+
+
+    public void backPropagation(final Matrix2D x, Matrix2D y, Matrix2D yHat, final Layer lastLayer) {
+        final double loss = this.loss.function(yHat.doubles[0], y.doubles[0]);
+        final Matrix2D wGrad = this.optimizer.weightGradient(lastLayer.weights, lastLayer.gradients, y, yHat, loss);
+        lastLayer.weights = lastLayer.weights.sub(this.optimizer.learningRate).mtimes(wGrad);
+        System.out.println(lastLayer.weights);
     }
 
 
@@ -100,9 +99,10 @@ public class Sequential {
             return input;
         }
         // Multiply the weight matrix by the current value matrix and add the bias
-        Matrix2D output = firstLayer.weights.multiply(input).add(firstLayer.biases.transpose());
+        Matrix2D output = firstLayer.weights.mtimes(input).madd(firstLayer.biases.transpose());
         // apply the activation function
-        this.map(output, firstLayer.activationFunction);
+        this.map(output, firstLayer.activation);
+        firstLayer.gradients = output;
         // recurse onto next layer
         return forwardPropagation(output, firstLayer.outputLayer);
     }
@@ -113,20 +113,20 @@ public class Sequential {
      * DoubleMatrix is mutated
      *
      * @param matrix             the matrix
-     * @param activationFunction the activation function
+     * @param activation the activation function
      */
-    private void map(final Matrix2D matrix, final ActivationFunction activationFunction) {
-        if (activationFunction instanceof Softmax) {
+    private void map(final Matrix2D matrix, final Activation activation) {
+        if (activation instanceof Activation.Softmax) {
             final double[] vector = new double[(int) matrix.getRowCount()];
             for (int i = 0; i < matrix.getRowCount(); i++) {
                 vector[i] = matrix.doubles[i][0];
             }
-            ((Softmax) activationFunction).setInputVector(vector);
+            ((Activation.Softmax) activation).inputVector = vector;
         }
         for (int i = 0; i < matrix.getRowCount(); i++) {
             double[] tmp = matrix.doubles[i];
             for (int j = 0; j < matrix.getColumnCount(); j++) {
-                tmp[j] = activationFunction.activate(tmp[j]);
+                tmp[j] = activation.activate(tmp[j]);
             }
         }
     }
