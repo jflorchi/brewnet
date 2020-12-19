@@ -1,7 +1,5 @@
 package ai.brewnet;
 
-import java.util.Arrays;
-
 public abstract class Optimizer {
 
     public double learningRate = 0.0001;
@@ -14,6 +12,13 @@ public abstract class Optimizer {
 
     public static class SGD extends Optimizer {
 
+        public SGD(final double learningRate) {
+            this.learningRate = learningRate;
+        }
+
+        /*
+            lastOutputMapped * lastLayer activation derivative mapped onto lastOutput * the derivative of the loss
+         */
         @Override
         public Matrix2D weightGradient(Matrix2D w, Matrix2D in, Matrix2D y, Matrix2D yHat, double loss) {
             return in.mtimes(yHat.msub(y).transpose()).times((1 / (double) w.doubles[0].length));

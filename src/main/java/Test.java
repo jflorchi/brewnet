@@ -1,4 +1,5 @@
 import ai.brewnet.Activation;
+import ai.brewnet.Optimizer;
 import ai.brewnet.Sequential;
 import ai.brewnet.Layer;
 
@@ -10,20 +11,21 @@ public class Test {
 
         model.addLayer(new Layer.Dense(2, new Activation.Relu()));
         model.addLayer(new Layer.Dense(4, new Activation.Relu()));
+        model.addLayer(new Layer.Dense(2, new Activation.Relu()));
         model.addLayer(new Layer.Dense(1, new Activation.Linear()));
 
-        model.compile();
+        model.compile(new Optimizer.SGD(0.00001));
 
         final double[][] x = new double[][]{
-                new double[]{0, 0},
                 new double[]{0, 1},
                 new double[]{1, 0},
+                new double[]{0, 0},
                 new double[]{1, 1},
         };
         final double[][] y = new double[][]{
+                new double[]{1},
+                new double[]{1},
                 new double[]{0},
-                new double[]{1},
-                new double[]{1},
                 new double[]{1},
         };
 

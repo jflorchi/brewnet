@@ -1,5 +1,6 @@
 package ai.brewnet;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class Sequential {
@@ -7,15 +8,7 @@ public class Sequential {
     public Activation activationFunction = new Activation.Linear();
     public LinkedList<Layer> layers = new LinkedList<>();
     public Loss loss = new Loss.MeanSquaredError();
-    public Optimizer optimizer = new Optimizer.SGD();
-
-    public Sequential() {
-
-    }
-
-    public Sequential(final LinkedList<Layer> layers) {
-        this.layers = layers;
-    }
+    public Optimizer optimizer;
 
     public void addLayer(final Layer layer) {
         if (this.layers.size() > 0) {
@@ -29,7 +22,8 @@ public class Sequential {
     /**
      * Create and initialize the networks weight and bias matrices to random values
      */
-    public void compile() {
+    public void compile(final Optimizer optimizer) {
+        this.optimizer = optimizer;
         for (Layer cur : this.layers) {
             if (cur.inputLayer == null) {
                 cur.weights = Matrix2D.createRandom(cur.units, cur.units);
@@ -50,7 +44,7 @@ public class Sequential {
      * @return the predicted values from the network
      */
     public Matrix2D predict(Matrix2D input) {
-        return this.forwardPropagation(input, this.layers.getFirst());
+        return this.forwardPropagation(input);
     }
 
 
@@ -62,20 +56,36 @@ public class Sequential {
      * @param y a 2D double array where each sub array is the expected output of the network
      */
     public void fit(final double[][] x, final double[][] y) {
-        for (int i = 0; i < x.length; i++) {
-            final Matrix2D in = new Matrix2D(new double[][]{x[i]});
-            final Matrix2D out = new Matrix2D(new double[][]{y[i]});
-            Matrix2D prediction = this.predict(in.transpose()).transpose();
-            this.backPropagation(in, out, prediction, this.layers.getLast());
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < x.length; j++) {
+                final Matrix2D in = new Matrix2D(new double[][]{x[j]});
+                final Matrix2D out = new Matrix2D(new double[][]{y[j]});
+                Matrix2D prediction = this.predict(in.transpose()).transpose();
+                System.out.println(prediction + " -> " + new Matrix2D(out));
+                this.backPropagation(out, prediction);
+                System.out.println(" -------- ");
+            }
         }
     }
 
 
-    public void backPropagation(final Matrix2D x, Matrix2D y, Matrix2D yHat, final Layer lastLayer) {
-        final double loss = this.loss.function(yHat.doubles[0], y.doubles[0]);
-        final Matrix2D wGrad = this.optimizer.weightGradient(lastLayer.weights, lastLayer.gradients, y, yHat, loss);
-        lastLayer.weights = lastLayer.weights.sub(this.optimizer.learningRate).mtimes(wGrad);
-
+    /*
+    lastOutputMapped * lastLayer activation derivative mapped onto lastOutput * the derivative of the loss
+     */
+    public void backPropagation(Matrix2D y, Matrix2D yHat) {
+        System.out.println("                                                LOSS: " + this.loss.function(yHat.doubles[0], y.doubles[0]));
+        System.out.println("DERIV_LOSS: " + this.loss.derivative(yHat.doubles[0], y.doubles[0]));
+        int i = this.layers.size() - 1;
+        while (i >= 1) {
+            final Layer layer = this.layers.get(i);
+            layer.gradient = this.layers.get(i - 1).lastActivOut.mtimes(layer.lastDerivOut.transpose()).times(this.loss.derivative(yHat.doubles[0], y.doubles[0]));
+            yHat = layer.lastActivOut;
+            System.out.println("WEIGHTS: " + layer.weights);
+            System.out.println("GRAD: " + layer.gradient);
+            layer.weights = layer.weights.msub(layer.gradient.times(this.optimizer.learningRate));
+            System.out.println("WEIGHTS 2: " + layer.weights);
+            i--;
+        }
     }
 
 
@@ -89,46 +99,18 @@ public class Sequential {
      * 3. Map the activation function on the result of the above operation
      *
      * @param input      the matrix of values
-     * @param firstLayer the next layer that the values will be fed into after mutation
      * @return the output of the current layer to be passed on to next layer
      */
-    private Matrix2D forwardPropagation(Matrix2D input, Layer firstLayer) {
-        // If we are done the provided layer is null so map the final activation function and return
-        if (firstLayer == null) {
-            this.map(input, this.activationFunction);
-            return input;
+    private Matrix2D forwardPropagation(Matrix2D input) {
+        Matrix2D out = new Matrix2D(0, 0);
+        for (Layer layer : this.layers) {
+            out = layer.weights.mtimes(input).madd(layer.biases.transpose());
+            layer.lastDerivOut = out.mapActivationDerivative(layer.activation);
+            out = out.mapActivationFunction(layer.activation);
+            layer.lastActivOut = out;
+            input = out;
         }
-        // Multiply the weight matrix by the current value matrix and add the bias
-        Matrix2D output = firstLayer.weights.mtimes(input).madd(firstLayer.biases.transpose());
-        // apply the activation function
-        this.map(output, firstLayer.activation);
-        firstLayer.gradients = output;
-        // recurse onto next layer
-        return forwardPropagation(output, firstLayer.outputLayer);
-    }
-
-
-    /**
-     * Maps the provided activation function on the provided DoubleMatrix
-     * DoubleMatrix is mutated
-     *
-     * @param matrix             the matrix
-     * @param activation the activation function
-     */
-    private void map(final Matrix2D matrix, final Activation activation) {
-        if (activation instanceof Activation.Softmax) {
-            final double[] vector = new double[(int) matrix.getRowCount()];
-            for (int i = 0; i < matrix.getRowCount(); i++) {
-                vector[i] = matrix.doubles[i][0];
-            }
-            ((Activation.Softmax) activation).inputVector = vector;
-        }
-        for (int i = 0; i < matrix.getRowCount(); i++) {
-            double[] tmp = matrix.doubles[i];
-            for (int j = 0; j < matrix.getColumnCount(); j++) {
-                tmp[j] = activation.activate(tmp[j]);
-            }
-        }
+        return out;
     }
 
     @Override
@@ -138,6 +120,15 @@ public class Sequential {
             str.append(layer.toString()).append("\n");
         }
         return str.toString();
+    }
+
+    public Matrix2D clone() {
+        try {
+            return (Matrix2D) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

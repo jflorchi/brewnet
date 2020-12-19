@@ -19,7 +19,7 @@ public abstract class Loss {
 
         @Override
         public double derivative(double[] output, double[] expected) {
-            return 0;
+            return 1;
         }
 
     }
@@ -30,14 +30,18 @@ public abstract class Loss {
         public double function(double[] output, double[] expected) {
             double total = 0;
             for (int i = 0; i < output.length; i++) {
-                total += Math.pow(expected[i] - output[i], 2) / 2;
+                total += Math.pow(expected[i] - output[i], 2);
             }
             return total / output.length;
         }
 
         @Override
         public double derivative(double[] output, double[] expected) {
-            return 0;
+            double total = 0;
+            for (int i = 0; i < output.length; i++) {
+                total += 2 * (expected[i] - output[i]);
+            }
+            return total / output.length;
         }
 
     }
@@ -55,7 +59,7 @@ public abstract class Loss {
 
         @Override
         public double derivative(double[] output, double[] expected) {
-            return 0;
+            return 1;
         }
 
     }

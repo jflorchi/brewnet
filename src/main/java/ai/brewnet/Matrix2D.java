@@ -15,11 +15,18 @@ public class Matrix2D {
         this.doubles = new double[rows][cols];
     }
 
+    public Matrix2D(final Matrix2D matrix2D) {
+        this.doubles = new double[matrix2D.getRowCount()][matrix2D.getColumnCount()];
+        for (int r = 0; r < this.doubles.length; r++) {
+            this.doubles[r] = matrix2D.doubles[r].clone();
+        }
+    }
+
     public static Matrix2D createRandom(int rows, int cols) {
         final Matrix2D matrix2D = new Matrix2D(rows, cols);
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                matrix2D.doubles[i][j] = new Random().nextGaussian();
+                matrix2D.doubles[i][j] = new Random().nextDouble();
             }
         }
         return matrix2D;
@@ -77,16 +84,17 @@ public class Matrix2D {
         return matrix2D;
     }
 
-    public Matrix2D msub(Matrix2D tensor) {
+    public Matrix2D msub(Matrix2D matrix) {
         int m1Rows = this.getRowCount();
         int m1Cols = this.getColumnCount();
-        int m2Rows = tensor.getRowCount();
+        int m2Rows = matrix.getRowCount();
         if (m1Cols != m2Rows) {
             throw new IllegalArgumentException("a.cols != b.rows: (" + m1Cols + " != " + m2Rows + ")");
         }
         final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
-        for (int i = 0; i < m1Rows; i++) {
-            matrix2D.doubles[i][0] = this.doubles[i][0] - tensor.doubles[0][i];
+        for (int i = 0; i < m1Cols; i++) {
+            System.out.println(this.doubles[0][i] + " - " + matrix.doubles[i][0]);
+            matrix2D.doubles[0][i] = this.doubles[0][i] - matrix.doubles[i][0];
         }
         return matrix2D;
     }
@@ -119,6 +127,35 @@ public class Matrix2D {
             }
         }
         return result;
+    }
+
+    public Matrix2D mapActivationFunction(final Activation activation) {
+        final Matrix2D m2 = new Matrix2D(this);
+//        if (activation instanceof Activation.Softmax) {
+//            final double[] vector = new double[(int) m2.getRowCount()];
+//            for (int i = 0; i < m2.getRowCount(); i++) {
+//                vector[i] = m2.doubles[i][0];
+//            }
+//            ((Activation.Softmax) activation).inputVector = vector;
+//        }
+        for (int i = 0; i < m2.getRowCount(); i++) {
+            double[] tmp = m2.doubles[i];
+            for (int j = 0; j < m2.getColumnCount(); j++) {
+                tmp[j] = activation.activate(tmp[j]);
+            }
+        }
+        return m2;
+    }
+
+    public Matrix2D mapActivationDerivative(final Activation activation) {
+        final Matrix2D m2 = new Matrix2D(this);
+        for (int i = 0; i < m2.getRowCount(); i++) {
+            double[] tmp = m2.doubles[i];
+            for (int j = 0; j < m2.getColumnCount(); j++) {
+                tmp[j] = activation.derivative(tmp[j]);
+            }
+        }
+        return m2;
     }
 
     public int[] shape() {
