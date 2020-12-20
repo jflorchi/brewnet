@@ -9,7 +9,8 @@ package ai.brewnet;
 public abstract class Layer {
 
     public int units;
-    public Matrix2D weights, biases, gradient, lastActivOut, lastDerivOut;
+    public Matrix2D weights, gradient, lastActivOut, lastDerivOut;
+    public Vector biases;
     public Layer outputLayer, inputLayer;
     public Activation activation;
 
@@ -20,7 +21,7 @@ public abstract class Layer {
             this.activation = activationFunction;
         }
 
-        public Dense(Matrix2D weights, Matrix2D biases, Activation function) {
+        public Dense(Matrix2D weights, Vector biases, Activation function) {
             this.weights = weights;
             this.biases = biases;
             this.activation = function;

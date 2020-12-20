@@ -1,7 +1,4 @@
-import ai.brewnet.Activation;
-import ai.brewnet.Optimizer;
-import ai.brewnet.Sequential;
-import ai.brewnet.Layer;
+import ai.brewnet.*;
 
 public class Test {
 
@@ -10,11 +7,10 @@ public class Test {
         final Sequential model = new Sequential();
 
         model.addLayer(new Layer.Dense(2, new Activation.Relu()));
-        model.addLayer(new Layer.Dense(4, new Activation.Relu()));
-        model.addLayer(new Layer.Dense(2, new Activation.Relu()));
+        model.addLayer(new Layer.Dense(8, new Activation.Relu()));
         model.addLayer(new Layer.Dense(1, new Activation.Linear()));
 
-        model.compile(new Optimizer.SGD(0.00001));
+        model.compile(new Optimizer.SGD(0.0001));
 
         final double[][] x = new double[][]{
                 new double[]{0, 1},
@@ -30,6 +26,11 @@ public class Test {
         };
 
         model.fit(x, y);
+
+//        System.out.println(model.predict(new Matrix2D(new double[][]{x[0]})));
+//        System.out.println(model.predict(new Matrix2D(new double[][]{x[1]})));
+//        System.out.println(model.predict(new Matrix2D(new double[][]{x[2]})));
+//        System.out.println(model.predict(new Matrix2D(new double[][]{x[3]})));
 
     }
 

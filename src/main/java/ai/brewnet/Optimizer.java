@@ -21,12 +21,12 @@ public abstract class Optimizer {
          */
         @Override
         public Matrix2D weightGradient(Matrix2D w, Matrix2D in, Matrix2D y, Matrix2D yHat, double loss) {
-            return in.mtimes(yHat.msub(y).transpose()).times((1 / (double) w.doubles[0].length));
+            return in.mul(yHat.sub(y).transpose()).scale((1 / (double) w.doubles[0].length));
         }
 
         @Override
         public Matrix2D biasGradient(Matrix2D w, Matrix2D in, Matrix2D y, Matrix2D yHat, double loss) {
-            return yHat.msub(y).times((1 / (double) w.doubles[0].length));
+            return yHat.sub(y).scale((1 / (double) w.doubles[0].length));
         }
 
     }

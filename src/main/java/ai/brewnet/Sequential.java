@@ -1,6 +1,5 @@
 package ai.brewnet;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 
 public class Sequential {
@@ -33,7 +32,7 @@ public class Sequential {
             } else {
                 cur.weights = Matrix2D.createRandom(cur.units, cur.inputLayer.units);
             }
-            cur.biases = Matrix2D.createRandomZeros(cur.units, 1);
+            cur.biases = Vector.createZeros(cur.units);
         }
     }
 
@@ -56,14 +55,12 @@ public class Sequential {
      * @param y a 2D double array where each sub array is the expected output of the network
      */
     public void fit(final double[][] x, final double[][] y) {
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < x.length; j++) {
-                final Matrix2D in = new Matrix2D(new double[][]{x[j]});
-                final Matrix2D out = new Matrix2D(new double[][]{y[j]});
-                Matrix2D prediction = this.predict(in.transpose()).transpose();
-                System.out.println(prediction + " -> " + new Matrix2D(out));
+        for (int i = 0; i < 1; i++) {
+            for (int j = 0; j < x[i].length; j++) {
+                final Matrix2D in = new Matrix2D(new double[][]{x[i]});
+                final Matrix2D out = new Matrix2D(new double[][]{y[i]});
+                Matrix2D prediction = this.predict(in);
                 this.backPropagation(out, prediction);
-                System.out.println(" -------- ");
             }
         }
     }
@@ -73,17 +70,17 @@ public class Sequential {
     lastOutputMapped * lastLayer activation derivative mapped onto lastOutput * the derivative of the loss
      */
     public void backPropagation(Matrix2D y, Matrix2D yHat) {
-        System.out.println("                                                LOSS: " + this.loss.function(yHat.doubles[0], y.doubles[0]));
-        System.out.println("DERIV_LOSS: " + this.loss.derivative(yHat.doubles[0], y.doubles[0]));
+        System.out.println("                                                                                                                 LOSS: " + this.loss.function(yHat, y));
+//        System.out.println("DERIV_LOSS: " + this.loss.derivative(yHat, y));
         int i = this.layers.size() - 1;
         while (i >= 1) {
             final Layer layer = this.layers.get(i);
-            layer.gradient = this.layers.get(i - 1).lastActivOut.mtimes(layer.lastDerivOut.transpose()).times(this.loss.derivative(yHat.doubles[0], y.doubles[0]));
+            layer.gradient = this.layers.get(i - 1).lastActivOut.mul(layer.lastDerivOut.transpose()).scale(this.loss.derivative(yHat, y)).transpose();
             yHat = layer.lastActivOut;
-            System.out.println("WEIGHTS: " + layer.weights);
-            System.out.println("GRAD: " + layer.gradient);
-            layer.weights = layer.weights.msub(layer.gradient.times(this.optimizer.learningRate));
-            System.out.println("WEIGHTS 2: " + layer.weights);
+//            System.out.println("WEIGHTS: " + layer.weights);
+//            System.out.println("GRAD: " + layer.gradient);
+            layer.weights = layer.weights.sub(layer.gradient.scale(this.optimizer.learningRate));
+//            System.out.println("WEIGHTS 2: " + layer.weights);
             i--;
         }
     }
@@ -104,9 +101,16 @@ public class Sequential {
     private Matrix2D forwardPropagation(Matrix2D input) {
         Matrix2D out = new Matrix2D(0, 0);
         for (Layer layer : this.layers) {
-            out = layer.weights.mtimes(input).madd(layer.biases.transpose());
-            layer.lastDerivOut = out.mapActivationDerivative(layer.activation);
-            out = out.mapActivationFunction(layer.activation);
+            System.out.println("START - ");
+            System.out.println();
+            System.out.println(layer.weights.shape());
+            System.out.println(input);
+            System.out.println(layer.weights.mul(input).shape());
+            System.out.println(layer.biases);
+            System.out.println("END - ");
+            out = layer.weights.mul(input);
+            layer.lastDerivOut = Activation.mapDerivative(out, layer.activation);
+            out = Activation.mapFunction(out, layer.activation);
             layer.lastActivOut = out;
             input = out;
         }

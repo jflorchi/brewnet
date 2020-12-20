@@ -1,5 +1,6 @@
 package ai.brewnet;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -7,6 +8,7 @@ public class Matrix2D {
 
     public final double[][] doubles;
 
+    // [rows][cols]
     public Matrix2D(final double[][] contents) {
         this.doubles = contents;
     }
@@ -22,6 +24,64 @@ public class Matrix2D {
         }
     }
 
+    /**
+     * Converts an N x M matrix to M x N and moves the values to their new location.
+     * In the future, we need to use a transpose boolean target and an accessor like getValue(row, col) which we can then
+     * dictate where we're getting the value from. If the transpose flag is enabled we just call doubles[col][row],
+     * if not it will call doubles[row][col]. This removes the need to actually move data, it just changes the indexes.
+     *
+     * @return  the new transposed matrix
+     */
+    public Matrix2D transpose() {
+        final Matrix2D result = new Matrix2D(this.getColumnCount(), this.getRowCount());
+        for (int i = 0; i < this.getRowCount(); i++) {
+            for (int j = 0; j < this.getColumnCount(); j++) {
+                result.doubles[j][i] = this.doubles[i][j];
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Clones the Matrix2D and then multiplies all values in the matrix by the scalar
+     * @param val   the scalar
+     * @return      the scaled matrix
+     */
+    public Matrix2D scale(double val) {
+        int m1Rows = this.getRowCount();
+        int m1Cols = this.getColumnCount();
+        final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
+        for (int rows = 0; rows < m1Rows; rows++) {
+            for (int cols = 0; cols < m1Cols; cols++) {
+                matrix2D.doubles[rows][cols] = this.doubles[rows][cols] * val;
+            }
+        }
+        return matrix2D;
+    }
+
+    /**
+     * Clones the Matrix2D and then divides all values in the matrix by the val
+     * @param val   the scalar
+     * @return      the scaled matrix
+     */
+    public Matrix2D div(double val) {
+        int m1Rows = this.getRowCount();
+        int m1Cols = this.getColumnCount();
+        final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
+        for (int rows = 0; rows < m1Rows; rows++) {
+            for (int cols = 0; cols < m1Cols; cols++) {
+                matrix2D.doubles[rows][cols] = this.doubles[rows][cols] / val;
+            }
+        }
+        return matrix2D;
+    }
+
+    /**
+     * Creates a Matrix of the given size and populates it with random double values from 0 to 1
+     * @param rows  the number of rows in the matrix
+     * @param cols  the number of columsn in the matrix
+     * @return      the matrix with populated values
+     */
     public static Matrix2D createRandom(int rows, int cols) {
         final Matrix2D matrix2D = new Matrix2D(rows, cols);
         for (int i = 0; i < rows; i++) {
@@ -32,7 +92,13 @@ public class Matrix2D {
         return matrix2D;
     }
 
-    public static Matrix2D createRandomZeros(int rows, int cols) {
+    /**
+     * Creates a Matrix of the given size and populates it with 0
+     * @param rows  the number of rows in the matrix
+     * @param cols  the number of columsn in the matrix
+     * @return      the matrix with populated zeros
+     */
+    public static Matrix2D createZeros(int rows, int cols) {
         final Matrix2D matrix2D = new Matrix2D(rows, cols);
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -42,15 +108,12 @@ public class Matrix2D {
         return matrix2D;
     }
 
-    public static double[] createRandom(int length) {
-        final double[] dubs = new double[length];
-        for (int i = 0; i < length; i++) {
-            dubs[i] = new Random().nextGaussian();
-        }
-        return dubs;
-    }
-
-    public Matrix2D mtimes(final Matrix2D matrix) {
+    /**
+     * Clones this matrix and then multiplies it by the provided matrix
+     * @param matrix    the provided matrix
+     * @return          a new matrix
+     */
+    public Matrix2D mul(final Matrix2D matrix) {
         final int m1RowCount = this.getRowCount();
         final int m1ColumnCount = this.getColumnCount();
         final int m2RowCount = matrix.getRowCount();
@@ -70,96 +133,151 @@ public class Matrix2D {
         return rTensor;
     }
 
-    public Matrix2D madd(Matrix2D tensor) {
+    /**
+     * The vector is assumed to be vertical in this context so that the Matrix multiplication is valid
+     * The matrix will always be a Nx1 matrix where N = this.getRowCount()
+     * @param vector    vector to multiply this by
+     * @return          the result matrix
+     */
+    public Matrix2D mul(final Vector vector) {
+        final int m1RowCount = this.getRowCount();
+        final int m1ColumnCount = this.getColumnCount();
+        if (m1ColumnCount != vector.doubles.length) {
+            throw new IllegalArgumentException("a.cols != b.rows: (" + m1ColumnCount + " != " + vector.doubles.length + ")");
+        }
+        final Matrix2D matrix2D = new Matrix2D(m1RowCount, 1);
+        for (int i = 0; i < m1RowCount; i++) {
+            for (int k = 0; k < vector.doubles.length; k++) {
+                matrix2D.doubles[i][0] += this.doubles[i][k] * vector.doubles[k];
+            }
+        }
+        return matrix2D;
+    }
+
+    /**
+     * Clones this matrix and the adds the provided matrix to it
+     * @param m the matrix to add to the cloned matrix
+     * @return  the new matrix
+     */
+    public Matrix2D add(Matrix2D m) {
         int m1Rows = this.getRowCount();
         int m1Cols = this.getColumnCount();
-        int m2Rows = tensor.getRowCount();
-        if (m1Cols != m2Rows) {
-            throw new IllegalArgumentException("a.cols != b.rows: (" + m1Cols + " != " + m2Rows + ")");
+        int m2Rows = m.getRowCount();
+        int m2Cols = m.getColumnCount();
+        if (m1Rows != m2Rows) {
+            throw new IllegalArgumentException("m1.rows != m2.rows " + m1Rows + " != " + m2Rows);
+        } else if (m1Cols != m2Cols) {
+            throw new IllegalArgumentException("m1.cols != m2.cols " + m1Cols + " != " + m2Cols);
         }
         final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
         for (int i = 0; i < m1Rows; i++) {
-            matrix2D.doubles[i][0] = this.doubles[i][0] + tensor.doubles[0][i];
+            for (int j = 0; j < m1Cols; j++) {
+                matrix2D.doubles[i][j] = this.doubles[i][j] + m.doubles[i][j];
+            }
         }
         return matrix2D;
     }
 
-    public Matrix2D msub(Matrix2D matrix) {
+    /**
+     * Adds a vector to the matrix, the vector is treated as a column vector
+     * @param vector    ...
+     * @return          the resulting Matrix2D
+     */
+    public Matrix2D add(Vector vector) {
         int m1Rows = this.getRowCount();
         int m1Cols = this.getColumnCount();
-        int m2Rows = matrix.getRowCount();
-        if (m1Cols != m2Rows) {
-            throw new IllegalArgumentException("a.cols != b.rows: (" + m1Cols + " != " + m2Rows + ")");
+        if (m1Rows != vector.doubles.length) {
+            throw new IllegalArgumentException("a.rows != b.length: (" + m1Rows + " != " + vector.doubles.length + ")");
         }
         final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
-        for (int i = 0; i < m1Cols; i++) {
-            System.out.println(this.doubles[0][i] + " - " + matrix.doubles[i][0]);
-            matrix2D.doubles[0][i] = this.doubles[0][i] - matrix.doubles[i][0];
+        for (int i = 0; i < m1Rows; i++) {
+            for (int j = 0; j < m1Cols; j++) {
+                matrix2D.doubles[i][j] = this.doubles[i][j] + vector.doubles[i];
+            }
         }
         return matrix2D;
     }
 
+    /**
+     * Clones the matrix and then adds the provided value from every element in the matrix
+     * @param val   the value
+     * @return      the return matrix
+     */
+    public Matrix2D add(double val) {
+        int m1Rows = this.getRowCount();
+        int m1Cols = this.getColumnCount();
+        final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
+        for (int rows = 0; rows < m1Rows; rows++) {
+            for (int cols = 0; cols < m1Cols; cols++) {
+                matrix2D.doubles[rows][cols] = this.doubles[rows][cols] + val;
+            }
+        }
+        return matrix2D;
+    }
+
+    /**
+     * Clones this matrix and the subtracts the provided matrix to it
+     * @param m the matrix to subtract to the cloned matrix
+     * @return  the new matrix
+     */
+    public Matrix2D sub(Matrix2D m) {
+        int m1Rows = this.getRowCount();
+        int m1Cols = this.getColumnCount();
+        int m2Rows = m.getRowCount();
+        int m2Cols = m.getColumnCount();
+        if (m1Rows != m2Rows) {
+            throw new IllegalArgumentException("m1.rows != m2.rows " + m1Rows + " != " + m2Rows);
+        } else if (m1Cols != m2Cols) {
+            throw new IllegalArgumentException("m1.cols != m2.cols " + m1Cols + " != " + m2Cols);
+        }
+        final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
+        for (int i = 0; i < m1Rows; i++) {
+            for (int j = 0; j < m1Cols; j++) {
+                matrix2D.doubles[i][j] = this.doubles[i][j] - m.doubles[i][j];
+            }
+        }
+        return matrix2D;
+    }
+
+    /**
+     * Subtracts a vector to the matrix, the vector is treated as a column vector
+     * @param vector    ...
+     * @return          the resulting Matrix2D
+     */
+    public Matrix2D sub(Vector vector) {
+        int m1Rows = this.getRowCount();
+        int m1Cols = this.getColumnCount();
+        if (m1Rows != vector.doubles.length) {
+            throw new IllegalArgumentException("a.rows != b.length: (" + m1Rows + " != " + vector.doubles.length + ")");
+        }
+        final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
+        for (int i = 0; i < m1Rows; i++) {
+            for (int j = 0; j < m1Cols; j++) {
+                matrix2D.doubles[i][j] = this.doubles[i][j] - vector.doubles[i];
+            }
+        }
+        return matrix2D;
+    }
+
+    /**
+     * Clones the matrix and then subtracts the provided value from every element in the matrix
+     * @param val   the value
+     * @return      the return matrix
+     */
     public Matrix2D sub(double val) {
         int m1Rows = this.getRowCount();
         int m1Cols = this.getColumnCount();
         final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
-        for (int i = 0; i < m1Rows; i++) {
-            matrix2D.doubles[i][0] = this.doubles[i][0] - val;
+        for (int rows = 0; rows < m1Rows; rows++) {
+            for (int cols = 0; cols < m1Cols; cols++) {
+                matrix2D.doubles[rows][cols] = this.doubles[rows][cols] - val;
+            }
         }
         return matrix2D;
     }
 
-    public Matrix2D times(double val) {
-        int m1Rows = this.getRowCount();
-        int m1Cols = this.getColumnCount();
-        final Matrix2D matrix2D = new Matrix2D(m1Rows, m1Cols);
-        for (int i = 0; i < m1Rows; i++) {
-            matrix2D.doubles[i][0] = this.doubles[i][0] * val;
-        }
-        return matrix2D;
-    }
-
-    public Matrix2D transpose() {
-        final Matrix2D result = new Matrix2D(this.getColumnCount(), this.getRowCount());
-        for (int i = 0; i < this.getRowCount(); i++) {
-            for (int j = 0; j < this.getColumnCount(); j++) {
-                result.doubles[j][i] = this.doubles[i][j];
-            }
-        }
-        return result;
-    }
-
-    public Matrix2D mapActivationFunction(final Activation activation) {
-        final Matrix2D m2 = new Matrix2D(this);
-//        if (activation instanceof Activation.Softmax) {
-//            final double[] vector = new double[(int) m2.getRowCount()];
-//            for (int i = 0; i < m2.getRowCount(); i++) {
-//                vector[i] = m2.doubles[i][0];
-//            }
-//            ((Activation.Softmax) activation).inputVector = vector;
-//        }
-        for (int i = 0; i < m2.getRowCount(); i++) {
-            double[] tmp = m2.doubles[i];
-            for (int j = 0; j < m2.getColumnCount(); j++) {
-                tmp[j] = activation.activate(tmp[j]);
-            }
-        }
-        return m2;
-    }
-
-    public Matrix2D mapActivationDerivative(final Activation activation) {
-        final Matrix2D m2 = new Matrix2D(this);
-        for (int i = 0; i < m2.getRowCount(); i++) {
-            double[] tmp = m2.doubles[i];
-            for (int j = 0; j < m2.getColumnCount(); j++) {
-                tmp[j] = activation.derivative(tmp[j]);
-            }
-        }
-        return m2;
-    }
-
-    public int[] shape() {
-        return new int[]{this.getRowCount(), this.getColumnCount()};
+    public Dimension shape() {
+        return new Dimension(this.getRowCount(), this.getColumnCount());
     }
 
     public int getRowCount() {
