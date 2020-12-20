@@ -33,7 +33,7 @@ public abstract class Layer {
     public String toString() {
         return getClass().getName() + "[units=" + this.units
                 + ", activation_function=" + this.activation.toString()
-                + "]";
+                + "] = {\n    Weights: " + this.weights.shape() + "\n    Biases: " + this.biases.doubles.length + "\n}";
     }
 
 }

@@ -10,7 +10,7 @@ public class Test {
         model.addLayer(new Layer.Dense(8, new Activation.Relu()));
         model.addLayer(new Layer.Dense(1, new Activation.Linear()));
 
-        model.compile(new Optimizer.SGD(0.0001));
+        model.compile(new Optimizer.SGD(0.001));
 
         final double[][] x = new double[][]{
                 new double[]{0, 1},
@@ -24,6 +24,8 @@ public class Test {
                 new double[]{0},
                 new double[]{1},
         };
+
+        System.out.println(model);
 
         model.fit(x, y);
 

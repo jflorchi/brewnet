@@ -277,7 +277,7 @@ public class Matrix2D {
     }
 
     public Dimension shape() {
-        return new Dimension(this.getRowCount(), this.getColumnCount());
+        return new Dimension(this.getColumnCount(), this.getRowCount());
     }
 
     public int getRowCount() {
