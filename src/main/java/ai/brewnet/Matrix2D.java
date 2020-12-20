@@ -276,6 +276,25 @@ public class Matrix2D {
         return matrix2D;
     }
 
+    /**
+     * Averages all colums and puts the results in a vector
+     * @return  average vector
+     */
+    public Vector toVector() {
+        int rCnt = this.getRowCount();
+        int cCnt = this.getColumnCount();
+        final Vector v = new Vector(rCnt);
+        for (int col = 0; col < cCnt; col++) {
+            for (int row = 0; row < rCnt; row++) {
+                double val = v.doubles[row];
+                val -= val / col;
+                val += this.doubles[row][col] / col;
+                v.doubles[row] = val;
+            }
+        }
+        return v;
+    }
+
     public Dimension shape() {
         return new Dimension(this.getColumnCount(), this.getRowCount());
     }

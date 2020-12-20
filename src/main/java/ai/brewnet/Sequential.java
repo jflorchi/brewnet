@@ -4,7 +4,6 @@ import java.util.LinkedList;
 
 public class Sequential {
 
-    public Activation activationFunction = new Activation.Linear();
     public LinkedList<Layer> layers = new LinkedList<>();
     public Loss loss = new Loss.MeanSquaredError();
     public Optimizer optimizer;
@@ -52,31 +51,31 @@ public class Sequential {
      * @param y a 2D double array where each sub array is the expected output of the network
      */
     public void fit(final double[][] x, final double[][] y) {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 50; i++) {
             for (int j = 0; j < x.length; j++) {
-                final Matrix2D in = new Matrix2D(new double[][]{x[j]});
-                final Matrix2D out = new Matrix2D(new double[][]{y[j]});
-                Matrix2D prediction = this.predict(in.transpose());
-                System.out.println(prediction);
-                System.out.println();
+                final Matrix2D in = new Matrix2D(new double[][]{x[j]}).transpose();
+                final Matrix2D out = new Matrix2D(new double[][]{y[j]}).transpose();
+                Matrix2D prediction = this.predict(in);
+                System.out.println("LOSS: " + this.loss.function(prediction, out));
                 this.backPropagation(out, prediction);
             }
         }
     }
 
 
-    /*
-    lastOutputMapped * lastLayer activation derivative mapped onto lastOutput * the derivative of the loss
-     */
+
     public void backPropagation(Matrix2D y, Matrix2D yHat) {
-        System.out.println("LOSS: " + this.loss.function(yHat, y));
-        System.out.println("DERIV_LOSS: " + this.loss.derivative(yHat, y));
+        double derivLoss = this.loss.derivative(yHat, y);
         int i = this.layers.size() - 1;
         while (i >= 1) {
             final Layer layer = this.layers.get(i);
-            layer.gradient = this.layers.get(i - 1).lastActivOut.mul(layer.lastDerivOut.transpose()).scale(this.loss.derivative(yHat, y)).transpose();
-            yHat = layer.lastActivOut;
-            layer.weights = layer.weights.sub(layer.gradient.scale(this.optimizer.learningRate));
+            Matrix2D weightGradient = this.layers.get(i - 1).lastActivOut.mul(layer.lastDerivOut.transpose()).scale(derivLoss).transpose();
+            Vector biasGradient = layer.weights.transpose().mul(layer.lastDerivOut).scale(derivLoss).toVector();
+//            System.out.println(layer.weights.transpose().mul(layer.lastDerivOut).scale(derivLoss));
+//            System.out.println(biasGradient);
+//            System.out.println(layer.biases);
+//            layer.biases = layer.biases.sub(biasGradient.scale(this.optimizer.learningRate));
+            layer.weights = layer.weights.sub(weightGradient.scale(this.optimizer.learningRate));
             i--;
         }
     }

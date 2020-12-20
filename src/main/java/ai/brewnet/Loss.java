@@ -30,26 +30,32 @@ public abstract class Loss {
 
         @Override
         public double function(Matrix2D output, Matrix2D expected) {
+            if (!output.shape().equals(expected.shape())) {
+                throw new IllegalArgumentException("output shape != expected shape " + output.shape() + " != " + expected.shape());
+            }
             double avg = 0;
-            for (int j = 0; j < output.doubles.length; j++) {
+            for (int row = 0; row < output.doubles.length; row++) {
                 double total = 0;
-                for (int i = 0; i < output.doubles[j].length; i++) {
-                    total += Math.pow(expected.doubles[i][j] - output.doubles[j][i], 2);
+                for (int col = 0; col < output.doubles[row].length; col++) {
+                    total += Math.pow(output.doubles[row][col] - expected.doubles[row][col], 2);
                 }
-                avg += total / output.doubles[j].length;
+                avg += total / output.doubles[row].length;
             }
             return avg / output.doubles.length;
         }
 
         @Override
         public double derivative(Matrix2D output, Matrix2D expected) {
+            if (!output.shape().equals(expected.shape())) {
+                throw new IllegalArgumentException("output shape != expected shape " + output.shape() + " != " + expected.shape());
+            }
             double avg = 0;
-            for (int j = 0; j < output.doubles.length; j++) {
+            for (int row = 0; row < output.doubles.length; row++) {
                 double total = 0;
-                for (int i = 0; i < output.doubles[j].length; i++) {
-                    total += 2 * (expected.doubles[i][j] - output.doubles[j][i]);
+                for (int col = 0; col < output.doubles[row].length; col++) {
+                    total += 2 * (output.doubles[row][col] - expected.doubles[row][col]);
                 }
-                avg += total / output.doubles[j].length;
+                avg += total / output.doubles[row].length;
             }
             return avg / output.doubles.length;
         }
