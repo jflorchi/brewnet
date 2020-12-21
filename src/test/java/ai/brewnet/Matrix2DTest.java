@@ -6,6 +6,30 @@ import org.junit.jupiter.api.Test;
 public class Matrix2DTest {
 
     @Test
+    public void testHadamard() {
+        final Matrix2D t1 = new Matrix2D(new double[][]{
+                new double[]{0, 3, 5},
+                new double[]{5, 5, 2}
+        });
+        final Matrix2D t2 = new Matrix2D(new double[][]{
+                new double[]{0, 3, 5},
+                new double[]{5, 5, 2}
+        });
+        final Matrix2D t3 = new Matrix2D(new double[][]{
+                new double[]{0.0, 9.0, 25.0},
+                new double[]{25.0, 25.0, 4.0},
+        });
+        final Matrix2D t4 = new Matrix2D(new double[][]{
+                new double[]{0.0, 9.0, 25.0},
+                new double[]{25.0, 25.0, 4.0},
+                new double[]{25.0, 25.0, 4.0},
+        });
+        assert t1.hadamard(t2).equals(t3);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> t1.hadamard(t4));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> t2.hadamard(t4));
+    }
+
+    @Test
     public void testMultiply() {
         final Matrix2D t1 = new Matrix2D(new double[][]{
                 new double[]{0, 3, 5},

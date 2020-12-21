@@ -25,6 +25,54 @@ public class Matrix2D {
     }
 
     /**
+     * Creates a Matrix of the given size and populates it with random double values from 0 to 1
+     * @param rows  the number of rows in the matrix
+     * @param cols  the number of columsn in the matrix
+     * @return      the matrix with populated values
+     */
+    public static Matrix2D createRandom(int rows, int cols) {
+        final Matrix2D matrix2D = new Matrix2D(rows, cols);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                matrix2D.doubles[i][j] = new Random().nextDouble();
+            }
+        }
+        return matrix2D;
+    }
+
+    /**
+     * Creates a Matrix of the given size and populates it with 0
+     * @param rows  the number of rows in the matrix
+     * @param cols  the number of columsn in the matrix
+     * @return      the matrix with populated zeros
+     */
+    public static Matrix2D createZeros(int rows, int cols) {
+        final Matrix2D matrix2D = new Matrix2D(rows, cols);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                matrix2D.doubles[i][j] = 0;
+            }
+        }
+        return matrix2D;
+    }
+
+    /**
+     * Creates a Matrix of the given size and populates it with 1
+     * @param rows  the number of rows in the matrix
+     * @param cols  the number of columsn in the matrix
+     * @return      the matrix with populated ones
+     */
+    public static Matrix2D createOnes(int rows, int cols) {
+        final Matrix2D matrix2D = new Matrix2D(rows, cols);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                matrix2D.doubles[i][j] = 1;
+            }
+        }
+        return matrix2D;
+    }
+
+    /**
      * Converts an N x M matrix to M x N and moves the values to their new location.
      * In the future, we need to use a transpose boolean target and an accessor like getValue(row, col) which we can then
      * dictate where we're getting the value from. If the transpose flag is enabled we just call doubles[col][row],
@@ -77,35 +125,31 @@ public class Matrix2D {
     }
 
     /**
-     * Creates a Matrix of the given size and populates it with random double values from 0 to 1
-     * @param rows  the number of rows in the matrix
-     * @param cols  the number of columsn in the matrix
-     * @return      the matrix with populated values
+     *  https://en.wikipedia.org/wiki/Hadamard_product_(matrices)
+     *
+     * Computes the hadamard product between this matrix and the provided one.
+     * The resulting matrix is a new matrix, it does not mutate this.
+     *
+     * @param m2    second matrix
+     * @return      Hadamard product Matrix2D
      */
-    public static Matrix2D createRandom(int rows, int cols) {
-        final Matrix2D matrix2D = new Matrix2D(rows, cols);
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                matrix2D.doubles[i][j] = new Random().nextDouble();
+    public Matrix2D hadamard(final Matrix2D m2) {
+        int m1Rows = this.getRowCount();
+        int m1Cols = this.getColumnCount();
+        int m2Rows = m2.getRowCount();
+        int m2Cols = m2.getColumnCount();
+        if (m1Rows != m2Rows) {
+            throw new IllegalArgumentException("m1.rows != m2.rows " + m1Rows + " != " + m2Rows);
+        } else if (m1Cols != m2Cols) {
+            throw new IllegalArgumentException("m1.cols != m2.cols " + m1Cols + " != " + m2Cols);
+        }
+        final Matrix2D mr = new Matrix2D(m1Rows, m1Cols);
+        for (int row = 0; row < m1Rows; row++) {
+            for (int col = 0; col < m1Cols; col++) {
+                mr.doubles[row][col] = this.doubles[row][col] * m2.doubles[row][col];
             }
         }
-        return matrix2D;
-    }
-
-    /**
-     * Creates a Matrix of the given size and populates it with 0
-     * @param rows  the number of rows in the matrix
-     * @param cols  the number of columsn in the matrix
-     * @return      the matrix with populated zeros
-     */
-    public static Matrix2D createZeros(int rows, int cols) {
-        final Matrix2D matrix2D = new Matrix2D(rows, cols);
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                matrix2D.doubles[i][j] = 0;
-            }
-        }
-        return matrix2D;
+        return mr;
     }
 
     /**

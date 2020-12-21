@@ -9,7 +9,7 @@ package ai.brewnet;
 public abstract class Layer {
 
     public int units;
-    public Matrix2D weights, gradient, lastActivOut, lastDerivOut;
+    public Matrix2D weights, lastActivOut, lastDerivOut;
     public Vector biases;
     public Layer outputLayer, inputLayer;
     public Activation activation;
@@ -33,7 +33,7 @@ public abstract class Layer {
     public String toString() {
         return getClass().getName() + "[units=" + this.units
                 + ", activation_function=" + this.activation.toString()
-                + "] = {\n    Weights: " + this.weights.shape() + "\n    Biases: " + this.biases.doubles.length + "\n}";
+                + "] = {\n    Weights: " + this.weights + "\n    Biases: " + this.biases.doubles.length + "\n}";
     }
 
 }

@@ -7,11 +7,10 @@ public class Test {
         final Sequential model = new Sequential();
 
         model.addLayer(new Layer.Dense(2, new Activation.Relu()));
-        model.addLayer(new Layer.Dense(3, new Activation.Relu()));
-        model.addLayer(new Layer.Dense(2, new Activation.Relu()));
+        model.addLayer(new Layer.Dense(16, new Activation.Relu()));
         model.addLayer(new Layer.Dense(1, new Activation.Linear()));
 
-        model.compile(new Optimizer.SGD(0.0001));
+        model.compile(new Optimizer.SGD(0.000001));
 
         final double[][] x = new double[][]{
                 new double[]{0, 1},

@@ -6,7 +6,7 @@ public abstract class Loss {
 
     public abstract double function(Matrix2D output, Matrix2D expected);
 
-    public abstract double derivative(Matrix2D output, Matrix2D expected);
+    public abstract Matrix2D derivative(Matrix2D output, Matrix2D expected);
 
 //    public static class MeanSquaredLogarithmicError extends Loss {
 //
@@ -37,7 +37,7 @@ public abstract class Loss {
             for (int row = 0; row < output.doubles.length; row++) {
                 double total = 0;
                 for (int col = 0; col < output.doubles[row].length; col++) {
-                    total += Math.pow(output.doubles[row][col] - expected.doubles[row][col], 2);
+                    total += Math.pow(expected.doubles[row][col] - output.doubles[row][col], 2);
                 }
                 avg += total / output.doubles[row].length;
             }
@@ -45,19 +45,17 @@ public abstract class Loss {
         }
 
         @Override
-        public double derivative(Matrix2D output, Matrix2D expected) {
+        public Matrix2D derivative(Matrix2D output, Matrix2D expected) {
             if (!output.shape().equals(expected.shape())) {
                 throw new IllegalArgumentException("output shape != expected shape " + output.shape() + " != " + expected.shape());
             }
-            double avg = 0;
+            Matrix2D m2 = new Matrix2D(output.getRowCount(), output.getColumnCount());
             for (int row = 0; row < output.doubles.length; row++) {
-                double total = 0;
                 for (int col = 0; col < output.doubles[row].length; col++) {
-                    total += 2 * (output.doubles[row][col] - expected.doubles[row][col]);
+                    m2.doubles[row][col] = 2 * (expected.doubles[row][col] - output.doubles[row][col]);
                 }
-                avg += total / output.doubles[row].length;
             }
-            return avg / output.doubles.length;
+            return m2;
         }
 
     }
