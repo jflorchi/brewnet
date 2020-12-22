@@ -2,6 +2,7 @@
 
 <p align="center">
   <img width="128" height="128" src="assets/brewnet.png">
+  <h1>BrewNET</h1>
 </p>
 
     Roadmap:
