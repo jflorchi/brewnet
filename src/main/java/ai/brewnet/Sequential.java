@@ -1,6 +1,5 @@
 package ai.brewnet;
 
-import javax.swing.*;
 import java.util.LinkedList;
 
 public class Sequential {
@@ -63,17 +62,18 @@ public class Sequential {
 
     private void backPropagation(Matrix2D y, Matrix2D yHat) {
         final Layer last = this.layers.getLast();
-        Matrix2D delta = this.loss.derivative(yHat, y).hadamard(last.lastDerivOut);
-
+        Matrix2D delta = this.loss.derivative(yHat, y).hadamard(Activation.mapDerivative(last.prevOutput, last.activation));
+        last.weights = last.weights.add(last.inputLayer.lastOutputActivationMapped.mul(delta.transpose().scale(this.optimizer.learningRate)));
         int i = this.layers.size() - 2;
-        while (i >= 0) {
+        while (i >= 1) {
             final Layer l = this.layers.get(i);
             final Layer lp1 = this.layers.get(i + 1);
-            lp1.weights = lp1.weights.sub(l.lastActivOut.mul(delta.transpose().scale(this.optimizer.learningRate)));
-            delta = lp1.weights.mul(delta).hadamard(l.lastDerivOut);
+            delta = lp1.weights.mul(delta).hadamard(Activation.mapDerivative(l.prevOutput, l.activation));
+            l.weights = l.weights.add(l.inputLayer.lastOutputActivationMapped.mul(delta.transpose().scale(this.optimizer.learningRate)));
             i--;
         }
         // is the first layer weights being updated?
+        // something going on here, need to get my indexes right
     }
 
 
@@ -93,9 +93,9 @@ public class Sequential {
         Matrix2D out = new Matrix2D(0, 0);
         for (Layer layer : this.layers) {
             out = layer.weights.transpose().mul(input).add(layer.biases);
-            layer.lastDerivOut = Activation.mapDerivative(out, layer.activation);
+            layer.prevOutput = out;
             out = Activation.mapFunction(out, layer.activation);
-            layer.lastActivOut = out;
+            layer.lastOutputActivationMapped = out;
             input = out;
         }
         return out;

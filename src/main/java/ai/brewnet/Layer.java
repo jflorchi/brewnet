@@ -9,7 +9,7 @@ package ai.brewnet;
 public abstract class Layer {
 
     public int units;
-    public Matrix2D weights, lastActivOut, lastDerivOut;
+    public Matrix2D weights, lastOutputActivationMapped, prevOutput;
     public Vector biases;
     public Layer outputLayer, inputLayer;
     public Activation activation;
