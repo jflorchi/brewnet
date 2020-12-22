@@ -30,11 +30,11 @@ public class Matrix2D {
      * @param cols  the number of columsn in the matrix
      * @return      the matrix with populated values
      */
-    public static Matrix2D createRandom(int rows, int cols) {
+    public static Matrix2D createUniformRandom(int rows, int cols) {
         final Matrix2D matrix2D = new Matrix2D(rows, cols);
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                matrix2D.doubles[i][j] = new Random().nextDouble();
+                matrix2D.doubles[i][j] = new Random().nextGaussian();
             }
         }
         return matrix2D;
@@ -335,6 +335,28 @@ public class Matrix2D {
                 val += this.doubles[row][col] / col;
                 v.doubles[row] = val;
             }
+        }
+        return v;
+    }
+
+    /**
+     * Averages the rows of the matrix and returns the average in column vector
+     * [[0, 1, 2, 3, 4],                [[2],
+     *  [6, 7, 8, 9, 10],           =    [8],
+     *  [11, 12, 13, 14, 15],           [13],
+     *  [16, 17, 18, 19, 20]]           [18]]
+     *
+     * @return  the average column vector
+     */
+    public Vector averageRows() {
+        final Vector v = new Vector(this.getRowCount());
+        for (int i = 0; i < this.getRowCount(); i++) {
+            double[] row = this.doubles[i];
+            double sum = 0;
+            for (int j = 0; j < row.length; j++) {
+                sum += row[j];
+            }
+            v.doubles[i] = sum / row.length;
         }
         return v;
     }

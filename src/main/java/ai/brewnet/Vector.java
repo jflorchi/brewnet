@@ -131,4 +131,5 @@ public class Vector {
     public String toString() {
         return Arrays.toString(this.doubles);
     }
+
 }

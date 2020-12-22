@@ -23,8 +23,7 @@ public class Sequential {
     public void compile(final Optimizer optimizer) {
         this.optimizer = optimizer;
         for (Layer cur : this.layers) {
-            cur.weights = Matrix2D.createRandom(cur.inputLayer == null ? cur.units : cur.inputLayer.units, cur.units);
-            cur.biases = Vector.createZeros(cur.units);
+            cur.init();
         }
     }
 
@@ -35,7 +34,7 @@ public class Sequential {
      * @return the predicted values from the network
      */
     public Matrix2D predict(Matrix2D input) {
-        return this.forwardPropagation(input);
+        return this.forward(input.transpose());
     }
 
 
@@ -47,34 +46,46 @@ public class Sequential {
      * @param y a 2D double array where each sub array is the expected output of the network
      */
     public void fit(final double[][] x, final double[][] y) {
-        for (int i = 0; i < 10000000; i++) {
+        for (int i = 0; i < 1000000; i++) {
 //            for (int j = 0; j < x.length; j++) {
 //
 //            }
             final Matrix2D in = new Matrix2D(x).transpose();
             final Matrix2D out = new Matrix2D(y).transpose();
-            Matrix2D prediction = this.predict(in);
+            Matrix2D prediction = this.forward(in);
             System.out.println("LOSS: " + this.loss.function(prediction, out));
-            this.backPropagation(out, prediction);
+            this.backward(in, out, prediction);
         }
     }
 
 
-
-    private void backPropagation(Matrix2D y, Matrix2D yHat) {
+    private void backward(Matrix2D x, Matrix2D y, Matrix2D yHat) {
+        // Last Layer
         final Layer last = this.layers.getLast();
         Matrix2D delta = this.loss.derivative(yHat, y).hadamard(Activation.mapDerivative(last.prevOutput, last.activation));
-        last.weights = last.weights.add(last.inputLayer.lastOutputActivationMapped.mul(delta.transpose().scale(this.optimizer.learningRate)));
+        Matrix2D scaledDelta = delta.scale(this.optimizer.learningRate);
+        last.weights = last.weights.add(last.inputLayer.lastOutputActivationMapped.mul(scaledDelta.transpose()));
+        last.biases = last.biases.add(scaledDelta.averageRows());
+
+        // Hidden Layers
         int i = this.layers.size() - 2;
         while (i >= 1) {
             final Layer l = this.layers.get(i);
-            final Layer lp1 = this.layers.get(i + 1);
-            delta = lp1.weights.mul(delta).hadamard(Activation.mapDerivative(l.prevOutput, l.activation));
-            l.weights = l.weights.add(l.inputLayer.lastOutputActivationMapped.mul(delta.transpose().scale(this.optimizer.learningRate)));
+            delta = this.apply(delta, l, l.inputLayer.lastOutputActivationMapped);
             i--;
         }
-        // is the first layer weights being updated?
-        // something going on here, need to get my indexes right
+
+        // First layer - use x as the input layer
+        this.apply(delta, this.layers.getFirst(), x);
+    }
+
+    private Matrix2D apply(Matrix2D delta, Layer l, Matrix2D input) {
+        final Layer lp1 = l.outputLayer;
+        delta = lp1.weights.mul(delta).hadamard(Activation.mapDerivative(l.prevOutput, l.activation));
+        Matrix2D scaledDelta = delta.scale(this.optimizer.learningRate);
+        l.weights = l.weights.add(input.mul(scaledDelta.transpose()));
+        l.biases = l.biases.add(scaledDelta.averageRows());
+        return delta;
     }
 
 
@@ -90,7 +101,7 @@ public class Sequential {
      * @param input      the matrix of values
      * @return the output of the current layer to be passed on to next layer
      */
-    private Matrix2D forwardPropagation(Matrix2D input) {
+    private Matrix2D forward(Matrix2D input) {
         Matrix2D out = new Matrix2D(0, 0);
         for (Layer layer : this.layers) {
             out = layer.weights.transpose().mul(input).add(layer.biases);
@@ -109,15 +120,6 @@ public class Sequential {
             str.append(layer.toString()).append("\n");
         }
         return str.toString();
-    }
-
-    public Matrix2D clone() {
-        try {
-            return (Matrix2D) super.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
 }

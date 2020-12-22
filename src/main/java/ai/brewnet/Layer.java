@@ -13,6 +13,12 @@ public abstract class Layer {
     public Vector biases;
     public Layer outputLayer, inputLayer;
     public Activation activation;
+    public Initializer initializer = new Initializer.Xavier();
+
+    public void init() {
+        this.weights = this.initializer.generate(this.inputLayer == null ? this.units : this.inputLayer.units, this.units);
+        this.biases = Vector.createZeros(this.units);
+    }
 
     public static class Dense extends Layer {
 
@@ -33,7 +39,7 @@ public abstract class Layer {
     public String toString() {
         return getClass().getName() + "[units=" + this.units
                 + ", activation_function=" + this.activation.toString()
-                + "] = {\n    Weights: " + this.weights + "\n    Biases: " + this.biases.doubles.length + "\n}";
+                + "] = {\n    Weights: " + this.weights.shape() + "\n    Biases: " + this.biases.doubles.length + "\n}";
     }
 
 }
