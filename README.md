@@ -1,7 +1,8 @@
 
 
-![](assets/brewnet.png)
-
+<p align="center">
+  <img width="64" height="64" src="assets/brewnet.png">
+</p>
 
     Roadmap:
     
