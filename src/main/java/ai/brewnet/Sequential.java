@@ -33,10 +33,9 @@ public class Sequential {
      * @param input network inputs
      * @return the predicted values from the network
      */
-    public Matrix2D predict(Matrix2D input) {
-        return this.forward(input.transpose());
+    public Matrix2D predict(double[][] input) {
+        return this.forward(new Matrix2D(input).transpose());
     }
-
 
     /**
      * Fit the training data to the model. AKA, training the model.
@@ -46,7 +45,7 @@ public class Sequential {
      * @param y a 2D double array where each sub array is the expected output of the network
      */
     public void fit(final double[][] x, final double[][] y) {
-        for (int i = 0; i < 1000000; i++) {
+        for (int i = 0; i < 1000; i++) {
 //            for (int j = 0; j < x.length; j++) {
 //
 //            }

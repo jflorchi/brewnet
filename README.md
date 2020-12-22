@@ -3,7 +3,6 @@ brewNET
     Roadmap:
     
         RELEASE-1.0:
-        - Bias gradients
         - Full code documentation
         - Regulatization
         - Converting to Transpose as a boolean value
