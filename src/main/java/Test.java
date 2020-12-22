@@ -4,10 +4,9 @@ public class Test {
 
     public static void main(String[] args) {
 
-        final Sequential model = new Sequential();
+        final NeuralNetwork model = new NeuralNetwork();
 
         model.addLayer(new Layer.Dense(2, new Activation.Relu()));
-        model.addLayer(new Layer.Dense(12, new Activation.Relu()));
         model.addLayer(new Layer.Dense(12, new Activation.Relu()));
         model.addLayer(new Layer.Dense(1, new Activation.Linear()));
 

@@ -1,4 +1,7 @@
-brewNET
+
+
+![](assets/brewnet.png)
+
 
     Roadmap:
     
@@ -7,7 +10,6 @@ brewNET
         - Regulatization
         - Converting to Transpose as a boolean value
         - Optimizations
-        - Initializer: Xaivier, Kaiming
         - Losses for categorization
         
         RELEASE-1.1:
@@ -19,4 +21,3 @@ brewNET
         
         RELEASE-2.0
         - Hardware Acceleration Support
-

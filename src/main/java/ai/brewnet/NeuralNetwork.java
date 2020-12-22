@@ -2,7 +2,7 @@ package ai.brewnet;
 
 import java.util.LinkedList;
 
-public class Sequential {
+public class NeuralNetwork {
 
     public LinkedList<Layer> layers = new LinkedList<>();
     public Loss loss = new Loss.MeanSquaredError();
@@ -45,7 +45,7 @@ public class Sequential {
      * @param y a 2D double array where each sub array is the expected output of the network
      */
     public void fit(final double[][] x, final double[][] y) {
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100000; i++) {
 //            for (int j = 0; j < x.length; j++) {
 //
 //            }

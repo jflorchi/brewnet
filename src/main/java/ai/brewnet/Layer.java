@@ -13,10 +13,10 @@ public abstract class Layer {
     public Vector biases;
     public Layer outputLayer, inputLayer;
     public Activation activation;
-    public Initializer initializer = new Initializer.Xavier();
+    public Initializer initializer = new Initializer.Kaiming();
 
     public void init() {
-        this.weights = this.initializer.generate(this.inputLayer == null ? this.units : this.inputLayer.units, this.units);
+        this.weights = this.initializer.initMatrix(this.inputLayer == null ? this.units : this.inputLayer.units, this.units);
         this.biases = Vector.createZeros(this.units);
     }
 
@@ -31,6 +31,13 @@ public abstract class Layer {
             this.weights = weights;
             this.biases = biases;
             this.activation = function;
+        }
+
+        public Dense(Matrix2D weights, Vector biases, Activation function, Initializer initializer) {
+            this.weights = weights;
+            this.biases = biases;
+            this.activation = function;
+            this.initializer = initializer;
         }
 
     }
