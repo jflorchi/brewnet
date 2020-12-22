@@ -7,9 +7,7 @@ public class Test {
         final Sequential model = new Sequential();
 
         model.addLayer(new Layer.Dense(2, new Activation.Relu()));
-        model.addLayer(new Layer.Dense(3, new Activation.Relu()));
         model.addLayer(new Layer.Dense(4, new Activation.Relu()));
-        model.addLayer(new Layer.Dense(2, new Activation.Relu()));
         model.addLayer(new Layer.Dense(1, new Activation.Linear()));
 
         model.compile(new Optimizer.SGD(0.0001));

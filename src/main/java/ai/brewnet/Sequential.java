@@ -47,14 +47,15 @@ public class Sequential {
      * @param y a 2D double array where each sub array is the expected output of the network
      */
     public void fit(final double[][] x, final double[][] y) {
-        for (int i = 0; i < 1000; i++) {
-            for (int j = 0; j < x.length; j++) {
-                final Matrix2D in = new Matrix2D(new double[][]{x[j]}).transpose();
-                final Matrix2D out = new Matrix2D(new double[][]{y[j]}).transpose();
-                Matrix2D prediction = this.predict(in);
-                System.out.println("LOSS: " + this.loss.function(prediction, out));
-                this.backPropagation(out, prediction);
-            }
+        for (int i = 0; i < 10000000; i++) {
+//            for (int j = 0; j < x.length; j++) {
+//
+//            }
+            final Matrix2D in = new Matrix2D(x).transpose();
+            final Matrix2D out = new Matrix2D(y).transpose();
+            Matrix2D prediction = this.predict(in);
+            System.out.println("LOSS: " + this.loss.function(prediction, out));
+            this.backPropagation(out, prediction);
         }
     }
 
@@ -93,9 +94,9 @@ public class Sequential {
         Matrix2D out = new Matrix2D(0, 0);
         for (Layer layer : this.layers) {
             out = layer.weights.transpose().mul(input).add(layer.biases);
-            layer.prevOutput = out;
+            layer.prevOutput = new Matrix2D(out);
             out = Activation.mapFunction(out, layer.activation);
-            layer.lastOutputActivationMapped = out;
+            layer.lastOutputActivationMapped = new Matrix2D(out);
             input = out;
         }
         return out;
