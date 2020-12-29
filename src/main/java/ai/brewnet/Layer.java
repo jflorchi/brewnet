@@ -13,7 +13,7 @@ public abstract class Layer {
     public Vector biases;
     public Layer outputLayer, inputLayer;
     public Activation activation;
-    public Initializer initializer = new Initializer.Kaiming();
+    public Initializer initializer = new Initializer.Xavier();
 
     public void init() {
         this.weights = this.initializer.initMatrix(this.inputLayer == null ? this.units : this.inputLayer.units, this.units);
@@ -22,9 +22,9 @@ public abstract class Layer {
 
     public static class Dense extends Layer {
 
-        public Dense(int units, Activation activationFunction) {
+        public Dense(int units, Activation function) {
             this.units = units;
-            this.activation = activationFunction;
+            this.activation = function;
         }
 
         public Dense(Matrix2D weights, Vector biases, Activation function) {

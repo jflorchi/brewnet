@@ -1,5 +1,6 @@
 package ai.brewnet;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class NeuralNetwork {
@@ -44,20 +45,34 @@ public class NeuralNetwork {
      * @param x a 2D double array where each sub array is an input to the network
      * @param y a 2D double array where each sub array is the expected output of the network
      */
-    public void fit(final double[][] x, final double[][] y) {
-        for (int i = 0; i < 100000; i++) {
-//            for (int j = 0; j < x.length; j++) {
-//
-//            }
-            final Matrix2D in = new Matrix2D(x).transpose();
-            final Matrix2D out = new Matrix2D(y).transpose();
-            Matrix2D prediction = this.forward(in);
-            System.out.println("LOSS: " + this.loss.function(prediction, out));
-            this.backward(in, out, prediction);
+    public void fit(final double[][] x, final double[][] y, final int epochs, final int batchSize) {
+        if (x.length != y.length) {
+            throw new IllegalArgumentException("Miss matched training data x.length != y.length " + x.length + " != " + y.length);
+        }
+        for (int i = 0; i < epochs; i++) {
+            for (int j = 0; j < x.length; j += batchSize) {
+                final int size = Math.min(batchSize, x.length - j);
+                final double[][] xs = new double[size][];
+                final double[][] ys = new double[size][];
+                xs[j] = x[i * j];
+                ys[j] = x[i * j];
+                System.out.println(Arrays.toString(xs));
+                final Matrix2D in = new Matrix2D(xs).transpose();
+                final Matrix2D out = new Matrix2D(ys).transpose();
+                Matrix2D prediction = this.forward(in);
+                System.out.println("LOSS: " + this.loss.function(prediction, out));
+                this.backward(in, out, prediction);
+            }
         }
     }
 
 
+    /**
+     * Propagate the error back through the network and update the weights
+     * @param x     the input to the network
+     * @param y     the expected output of the network
+     * @param yHat  the actual output of the network
+     */
     private void backward(Matrix2D x, Matrix2D y, Matrix2D yHat) {
         // Last Layer
         final Layer last = this.layers.getLast();
@@ -78,6 +93,13 @@ public class NeuralNetwork {
         this.apply(delta, this.layers.getFirst(), x);
     }
 
+    /**
+     * Function extraction for layer back propagation
+     * @param delta gradient matrix
+     * @param l     layer to update weights on
+     * @param input layer / input that feeds into the layer that we are updating
+     * @return      the new gradient matrix
+     */
     private Matrix2D apply(Matrix2D delta, Layer l, Matrix2D input) {
         final Layer lp1 = l.outputLayer;
         delta = lp1.weights.mul(delta).hadamard(Activation.mapDerivative(l.prevOutput, l.activation));

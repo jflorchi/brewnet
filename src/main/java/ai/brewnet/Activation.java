@@ -69,6 +69,24 @@ public abstract class Activation {
      */
     public abstract double derivative(double x);
 
+
+    /**
+     * tanh
+     * f(x) = Math.tanh(x)
+     */
+    public static class Tanh extends Activation {
+
+        @Override
+        public double activate(double x) {
+            return Math.tanh(x);
+        }
+
+        @Override
+        public double derivative(double x) {
+            return 1 - Math.pow(Math.tanh(x), 2);
+        }
+    }
+
     /**
      * Rectified linear unit
      * f(x) = max(0, x)

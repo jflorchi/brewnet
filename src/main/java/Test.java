@@ -7,10 +7,9 @@ public class Test {
         final NeuralNetwork model = new NeuralNetwork();
 
         model.addLayer(new Layer.Dense(2, new Activation.Relu()));
-        model.addLayer(new Layer.Dense(12, new Activation.Relu()));
         model.addLayer(new Layer.Dense(1, new Activation.Linear()));
 
-        model.compile(new Optimizer.SGD(0.00001));
+        model.compile(new Optimizer.SGD(0.001));
 
         final double[][] x = new double[][]{
                 new double[]{0, 1},
@@ -27,7 +26,7 @@ public class Test {
 
         System.out.println(model);
 
-        model.fit(x, y);
+        model.fit(x, y, 100, 4);
 
         System.out.println(model.predict(new double[][]{x[0]}));
         System.out.println(model.predict(new double[][]{x[1]}));

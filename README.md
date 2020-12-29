@@ -1,7 +1,7 @@
 
 
 <p align="center">
-  <img width="128" height="128" src="assets/brewnet.png">
+  <img width="256" height="256" src="assets/brewnet.png">
   <h1>BrewNET</h1>
 </p>
 
@@ -9,13 +9,13 @@
     
         RELEASE-1.0:
         - Full code documentation
-        - Regulatization
-        - Converting to Transpose as a boolean value
         - Optimizations
         - Losses for categorization
+        - Epochs and batches
         
         RELEASE-1.1:
         - Regulatization
+        - Adam and RMSProp optimizers
         
         RELEASE-1.2:
         - RNN, LSTM, GRU Layers
