@@ -49,18 +49,26 @@ public class NeuralNetwork {
         if (x.length != y.length) {
             throw new IllegalArgumentException("Miss matched training data x.length != y.length " + x.length + " != " + y.length);
         }
-        for (int i = 0; i < epochs; i++) {
+        for (int i = 1; i <= epochs; i++) {
+            System.out.println("Epoch: " + i);
             for (int j = 0; j < x.length; j += batchSize) {
                 final int size = Math.min(batchSize, x.length - j);
                 final double[][] xs = new double[size][];
                 final double[][] ys = new double[size][];
-                xs[j] = x[i * j];
-                ys[j] = x[i * j];
-                System.out.println(Arrays.toString(xs));
+                for (int k = 0; k < size; k++) {
+                    xs[k] = x[j + k];
+                    ys[k] = y[j + k];
+                }
                 final Matrix2D in = new Matrix2D(xs).transpose();
                 final Matrix2D out = new Matrix2D(ys).transpose();
                 Matrix2D prediction = this.forward(in);
-                System.out.println("LOSS: " + this.loss.function(prediction, out));
+                long percent = Math.round((((double) j) / x.length) * 100);
+                String prog = "[";
+                for (int k = 0; k < 50; k++) {
+                    prog += k <= (percent / 2) ? "=" : " ";
+                }
+                prog += "] " + Math.min(x.length, (j + batchSize)) + "/" + x.length; // print loss somewhere
+                System.out.println(prog);
                 this.backward(in, out, prediction);
             }
         }
